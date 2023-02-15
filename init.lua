@@ -25,6 +25,7 @@ minetest.register_chatcommand("iteminfo", {
         local itemdef = stack:get_definition()
         local tool_capabilities = itemdef.tool_capabilities
         local groups = itemdef.groups
+        -- local damage_groups = itemdef.damage_groups
         local line = 3.6
 
         local desc = itemdef.description
@@ -40,16 +41,16 @@ minetest.register_chatcommand("iteminfo", {
         desc = itemdef.description
         end
 
-        local formspec = "size[18,8]" ..
+        local formspec = "size[18,10]" ..
         "item_image[0,0;7,7;" .. itemdef.name .. "]" ..
-        "background[-0.15,-0.2;18.3,8.65;iteminfo_background.png]"..
+        "background[-0.15,-0.2;18.3,10.65;iteminfo_background.png]"..
         "box[0,0;5.6,6.1;#030303]" ..
         "box[0,0;5.6,6.1;#030303]" ..
-        "box[5.9,0;11.85,8.1;#030303]" ..
-        "box[5.9,0;11.85,8.1;#030303]"..
+        "box[5.9,0;11.85,10.1;#030303]" ..
+        "box[5.9,0;11.85,10.1;#030303]"..
         "style_type[textarea;bgcolor=#000000;textcolor=orange;border=false]"..
-        "box[0,6.2;5.6,1.9;#030303]" ..
-        "box[0,6.2;5.6,1.9;#030303]" ..
+        "box[0,6.2;5.6,3.9;#030303]" ..
+        "box[0,6.2;5.6,3.9;#030303]" ..
         "label[0.1,6.3;"..minetest.colorize("#01B5F7", "Name: ") .. minetest.colorize("orange", desc) .. "]" ..
         "label[6,1.6;"..minetest.colorize("#01B5F7", "String: ").."]"..
         "textarea[6.3,2.2;11.8,1.9;stringarea; ;"..stack:to_string().."]"
@@ -59,9 +60,11 @@ minetest.register_chatcommand("iteminfo", {
         formspec = formspec .. "label[6,0;"..minetest.colorize("#01B5F7", "Amount: ") ..  minetest.colorize("orange", stack:get_count()) .. "]"
         end
     
-        if tool_capabilities and tool_capabilities.full_punch_interval and tool_capabilities.max_drop_level then
+        if tool_capabilities and tool_capabilities.full_punch_interval and tool_capabilities.max_drop_level and tool_capabilities.damage_groups then
         formspec = formspec .. "label[6,0.5;"..minetest.colorize("#01B5F7", "Full punch interval: ").. minetest.colorize("orange", tool_capabilities.full_punch_interval) .. "]"
         formspec = formspec .. "label[6,1;" .. minetest.colorize("#01B5F7", "Max drop level: ") .. minetest.colorize("orange", tool_capabilities.max_drop_level) .. "]"
+        formspec = formspec .. "label[6,8;"..minetest.colorize("#01B5F7", "Damage groups: ").. "]"
+        formspec = formspec .. "textarea[6.3,8.6;11.8,1.5;damage_groups; ;"..minetest.serialize(tool_capabilities.damage_groups).."]"
         end
     
         if groups then
@@ -70,14 +73,13 @@ minetest.register_chatcommand("iteminfo", {
         end
     
         if tool_capabilities and tool_capabilities.groupcaps then
-        formspec = formspec .. "label[6,5.6;"..minetest.colorize("#01B5F7", "Group capabilities: ").."]"
-        text = ""
-        for group, capabilities in pairs(tool_capabilities.groupcaps) do
-            text = text .. group .. ": " .. minetest.serialize(capabilities).. "\n"
+            formspec = formspec .. "label[6,5.6;"..minetest.colorize("#01B5F7", "Group capabilities: ").."]"
+            text = ""
+            for group, capabilities in pairs(tool_capabilities.groupcaps) do
+                text = text .. group .. ": " .. minetest.serialize(capabilities).. "\n"
+            end
+            formspec = formspec .. "textarea[6.3,6.2;11.8,2.2;gcapabilities; ;"..text.."]"
         end
-        formspec = formspec .. "textarea[6.3,6.2;11.8,2.2;gcapabilities; ;"..text.."]"
-        end
-    
         minetest.show_formspec(name, "iteminfo", formspec)
     end,
  
