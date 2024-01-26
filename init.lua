@@ -44,43 +44,38 @@ minetest.register_chatcommand("iteminfo", {
             desc = itemdef.description
         end
 
-        local formspec = "size[18,10]" ..
-        "item_image[0,0;7,7;" .. itemdef.name .. "]" ..
-        "box[0,0;5.6,6.1;#030303]" ..
-        "box[0,0;5.6,6.1;#030303]" ..
-        "box[5.9,0;11.85,10.1;#030303]" ..
-        "box[5.9,0;11.85,10.1;#030303]"..
-        "box[0,6.2;5.6,3.9;#030303]" ..
-        "box[0,6.2;5.6,3.9;#030303]" ..
-        "label[0.1,6.3;"..minetest.colorize("#01B5F7", "Name: ") .. minetest.colorize("orange", desc) .. "]" ..
-        "label[6,1.6;"..minetest.colorize("#01B5F7", "String: ").."]"..
-        "textarea[6.3,2.2;11.8,1.9;;;"..stack:to_string().."]"
-
-    
-        if stack:is_known() and stack:get_count() > 0 then
-        formspec = formspec .. "label[6,0;"..minetest.colorize("#01B5F7", "Amount: ") ..  minetest.colorize("orange", stack:get_count()) .. "]"
-        end
-    
-        if tool_capabilities and tool_capabilities.full_punch_interval and tool_capabilities.max_drop_level and tool_capabilities.damage_groups then
-        formspec = formspec .. "label[6,0.5;"..minetest.colorize("#01B5F7", "Full punch interval: ").. minetest.colorize("orange", tool_capabilities.full_punch_interval) .. "]"
-        formspec = formspec .. "label[6,1;" .. minetest.colorize("#01B5F7", "Max drop level: ") .. minetest.colorize("orange", tool_capabilities.max_drop_level) .. "]"
-        formspec = formspec .. "label[6,8;"..minetest.colorize("#01B5F7", "Damage groups: ").. "]"
-        formspec = formspec .. "textarea[6.3,8.6;11.8,1.5;;;"..minetest.serialize(tool_capabilities.damage_groups).."]"
-        end
-    
-        if groups then
-        formspec = formspec .. "label[6,3.8;"..minetest.colorize("#01B5F7", "Groups: ").. "]"
-        formspec = formspec .. "textarea[6.3,4.4;11.8,1.5;;;"..minetest.serialize(groups).."]"
-        end
-    
+        local formspec = "size[10,3]" ..
+        "bgcolor[#080808BB;true]" ..
+        "background9[0,0;10,3;iteminfo_bg.png;true]"..
+        "item_image[0,0;3.35,3.5;" .. itemdef.name .. "]" ..
+        "box[0,0;2.7,3.05;#020202]" ..
+        "box[3,0;6.8,3;#020202]" ..
+        "textarea[3.3,0;7,3.65;;;" ..
+        minetest.colorize("#01B5F7", "Name: ") .. minetest.colorize("orange", desc) ..
+        "\n" ..
+        minetest.colorize("#01B5F7", "String: ") .. stack:to_string() ..
+        "\n" ..
+        (stack:is_known() and stack:get_count() > 0 and minetest.colorize("#01B5F7", "Amount: ") .. minetest.colorize("orange", stack:get_count()) or "") ..
+        "\n" ..
+        (tool_capabilities and tool_capabilities.full_punch_interval and tool_capabilities.max_drop_level and tool_capabilities.damage_groups and
+            minetest.colorize("#01B5F7", "Full punch interval: ") .. minetest.colorize("orange", tool_capabilities.full_punch_interval) ..
+            "\n" ..
+            minetest.colorize("#01B5F7", "Max drop level: ") .. minetest.colorize("orange", tool_capabilities.max_drop_level) ..
+            "\n" ..
+            minetest.colorize("#01B5F7", "Damage groups: ") .. minetest.serialize(tool_capabilities.damage_groups) or "") ..
+        "\n" ..
+        (groups and minetest.colorize("#01B5F7", "Groups: ") .. minetest.serialize(groups) or "") ..
+        "\n" ..
+        (tool_capabilities and tool_capabilities.groupcaps and minetest.colorize("#01B5F7", "Group capabilities: ") or "")
+        
         if tool_capabilities and tool_capabilities.groupcaps then
-            formspec = formspec .. "label[6,5.6;"..minetest.colorize("#01B5F7", "Group capabilities: ").."]"
-            text = ""
             for group, capabilities in pairs(tool_capabilities.groupcaps) do
-                text = text .. group .. ": " .. minetest.serialize(capabilities).. "\n"
+                formspec = formspec .. group .. ": " .. minetest.serialize(capabilities).. "\n"
             end
-            formspec = formspec .. "textarea[6.3,6.2;11.8,2.2;;;"..text.."]"
         end
+
+        formspec = formspec .. "]"
+
         minetest.show_formspec(name, "iteminfo", formspec)
     end,
 })

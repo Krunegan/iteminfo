@@ -3,7 +3,7 @@
 Command: /iteminfo
 Description: Shows information about the item in use.
 
-![Image](/screenshot.png)
+![Image](/screenshot.gif)
 
 ## License
 
