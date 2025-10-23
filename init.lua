@@ -21,9 +21,11 @@ DEALINGS IN THE SOFTWARE.
 
 ]]
 
+local S = minetest.get_translator(minetest.get_current_modname())
+
 minetest.register_chatcommand("iteminfo", {
     params = "",
-    description = "Shows information about the item in use",
+    description = S("Shows information about the wielded item"),
     func = function(name)
         local player = minetest.get_player_by_name(name)
         local stack = player:get_wielded_item()
@@ -33,49 +35,48 @@ minetest.register_chatcommand("iteminfo", {
         local line = 3.6
         local desc = itemdef.description
 
-        if string.len(desc) > 44 then
-            desc = ""
-            local i = 1
-            while i <= string.len(itemdef.description) do
-                desc = desc .. string.sub(itemdef.description, i, i + 44) .. "\n"
-                i = i + 44
-            end
-        else
-            desc = itemdef.description
-        end
+        local formspec_table = {}
+        local C; function C(t) table.insert(formspec_table, t) return C end
 
-        local formspec = "size[10,3]" ..
-        "bgcolor[#080808BB;true]" ..
-        "background9[0,0;10,3;iteminfo_bg.png;true]"..
-        "item_image[0,0;3.35,3.5;" .. itemdef.name .. "]" ..
-        "box[0,0;2.7,3.05;#020202]" ..
-        "box[3,0;6.8,3;#020202]" ..
-        "textarea[3.3,0;7,3.65;;;" ..
-        minetest.colorize("#01B5F7", "Name: ") .. minetest.colorize("orange", desc) ..
-        "\n" ..
-        minetest.colorize("#01B5F7", "String: ") .. stack:to_string() ..
-        "\n" ..
-        (stack:is_known() and stack:get_count() > 0 and minetest.colorize("#01B5F7", "Amount: ") .. minetest.colorize("orange", stack:get_count()) or "") ..
-        "\n" ..
-        (tool_capabilities and tool_capabilities.full_punch_interval and tool_capabilities.max_drop_level and tool_capabilities.damage_groups and
-            minetest.colorize("#01B5F7", "Full punch interval: ") .. minetest.colorize("orange", tool_capabilities.full_punch_interval) ..
-            "\n" ..
-            minetest.colorize("#01B5F7", "Max drop level: ") .. minetest.colorize("orange", tool_capabilities.max_drop_level) ..
-            "\n" ..
-            minetest.colorize("#01B5F7", "Damage groups: ") .. minetest.serialize(tool_capabilities.damage_groups) or "") ..
-        "\n" ..
-        (groups and minetest.colorize("#01B5F7", "Groups: ") .. minetest.serialize(groups) or "") ..
-        "\n" ..
-        (tool_capabilities and tool_capabilities.groupcaps and minetest.colorize("#01B5F7", "Group capabilities: ") or "")
-        
+        C"size[10,3]"
+        C"bgcolor[#080808BB;true]"
+        C"formspec_version[3]"
+        C"background9[0,0;10,3;iteminfo_bg.png;true]"
+        C"box[0,0;2.7,3.05;#020202]"
+        C"box[3,0;6.8,3;#020202]"
+        C"item_image[0,0;3.35,3.5;" (itemdef.name) "]"
+        C"textarea[3.3,0;7,3.65;;;"
+        C(minetest.colorize("#01B5F7", S("Name: @1", desc)))
+        C"\n"
+        if stack:is_known() and stack:get_count() > 1 then
+            --TL: @1 is a whole number
+            C(minetest.colorize("#01B5F7", S("Amount: @1", stack:get_count())))
+            C"\n"
+        end
+        C"\n"
+        C(minetest.colorize("#01B5F7", S("String: @1", stack:to_string())))
+        C"\n\n"
+        if tool_capabilities and tool_capabilities.full_punch_interval
+        and tool_capabilities.max_drop_level and tool_capabilities.damage_groups then
+            --TL: @1 is in seconds
+            C(minetest.colorize("#01B5F7", S("Full punch interval: @1s", tool_capabilities.full_punch_interval)))
+            C"\n"
+            --TL: @1 is a whole number
+            C(minetest.colorize("#01B5F7", S("Max drop level: @1", tool_capabilities.max_drop_level)))
+            C"\n"
+            C(minetest.colorize("#01B5F7", S("Damage groups: @1", dump(tool_capabilities.damage_groups))))
+        end
+        C"\n\n"
+        if groups then
+            C(minetest.colorize("#01B5F7", S("Groups: @1", dump(groups))))
+        end
+        C"\n\n"
         if tool_capabilities and tool_capabilities.groupcaps then
-            for group, capabilities in pairs(tool_capabilities.groupcaps) do
-                formspec = formspec .. group .. ": " .. minetest.serialize(capabilities).. "\n"
-            end
+            C(minetest.colorize("#01B5F7", S("Group capabilities: @1", dump(tool_capabilities.groupcaps))))
         end
 
-        formspec = formspec .. "]"
+        C"]"
 
-        minetest.show_formspec(name, "iteminfo", formspec)
+        minetest.show_formspec(name, "iteminfo", table.concat(formspec_table))
     end,
 })
