@@ -30,10 +30,10 @@ minetest.register_chatcommand("iteminfo", {
         local player = minetest.get_player_by_name(name)
         local stack = player:get_wielded_item()
         local itemdef = stack:get_definition()
-        local tool_capabilities = itemdef.tool_capabilities
+        local tool_capabilities = stack:get_tool_capabilities()
         local groups = itemdef.groups
         local line = 3.6
-        local desc = itemdef.description
+        local desc = stack:get_short_description()
 
         local formspec_table = {}
         local C; function C(t) table.insert(formspec_table, t) return C end
